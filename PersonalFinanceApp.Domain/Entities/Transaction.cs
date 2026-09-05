@@ -5,12 +5,13 @@ namespace PersonalFinanceApp.Domain.Entities;
 
 public class Transaction : BaseEntity
 {
+   public string UserId { get; private set; } = null!;
     public Guid AccountId { get; private set; }
-    public Guid? CategoryId { get; private set; }
     public decimal Amount { get; private set; }
     public TransactionType Type { get; private set; }
-    public DateTime TransactionDateUtc { get; private set; }
-    public string Description { get; private set; } = string.Empty;
+    public DateTime TransactionDate { get; private set; }
+    public string? Description { get; private set; }
+    public Guid? CategoryId { get; private set; }
 
     // Navigation properties
     public Account Account { get; private set; } = null!;
@@ -18,28 +19,23 @@ public class Transaction : BaseEntity
 
     private Transaction() { }
 
-    public Transaction(
-        Guid accountId, 
-        decimal amount, 
-        TransactionType type, 
-        DateTime transactionDateUtc, 
-        string description, 
-        Guid? categoryId = null)
+    public Transaction(string userId, Guid accountId, decimal amount, TransactionType type, DateTime transactionDate, string? description = null, Guid? categoryId = null)
     {
-        if (accountId == Guid.Empty)
-            throw new ArgumentException("Transaction must be linked to a valid account.", nameof(accountId));
-
+        if (string.IsNullOrWhiteSpace(userId))
+            throw new ArgumentException("User ID cannot be empty.", nameof(userId));
         if (amount <= 0)
-            throw new ArgumentOutOfRangeException(nameof(amount), "Amount must be greater than zero.");
+            throw new ArgumentException("Amount must be strictly positive.", nameof(amount));
 
+        Id = Guid.NewGuid();
+        UserId = userId;
         AccountId = accountId;
         Amount = amount;
         Type = type;
-        TransactionDateUtc = transactionDateUtc;
-        Description = description?.Trim() ?? string.Empty;
+        TransactionDate = transactionDate.ToUniversalTime();
+        Description = description?.Trim();
         CategoryId = categoryId;
+        CreatedAtUtc = DateTime.UtcNow;
     }
-
     // For tags:
 
     private readonly List<Tag> _tags = [];

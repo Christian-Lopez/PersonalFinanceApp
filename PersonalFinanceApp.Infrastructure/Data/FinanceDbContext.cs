@@ -24,13 +24,14 @@ public class FinanceDbContext : IdentityDbContext<ApplicationUser>, IApplication
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        // Must run first to configure Identity tables (AspNetUsers, AspNetRoles, etc.)
         base.OnModelCreating(modelBuilder);
-
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(FinanceDbContext).Assembly);
 
-        // Tenant query filter
+        // Tenant query filters
         modelBuilder.Entity<Account>()
             .HasQueryFilter(a => _currentUserService.IsAdmin || a.UserId == _currentUserService.UserId);
+            
+        modelBuilder.Entity<Transaction>()
+            .HasQueryFilter(t => _currentUserService.IsAdmin || t.UserId == _currentUserService.UserId);
     }
 }
