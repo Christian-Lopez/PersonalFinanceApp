@@ -2,9 +2,11 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using PersonalFinanceApp.Application.Features.Accounts.Commands.CreateAccount;
 using PersonalFinanceApp.Application.Features.Accounts.Queries.GetAccounts;
+using Microsoft.AspNetCore.Authorization;
 
 namespace PersonalFinanceApp.Api.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/[controller]")]
 public class AccountsController : ControllerBase
