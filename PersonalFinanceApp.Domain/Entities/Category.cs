@@ -8,6 +8,7 @@ public class Category : BaseEntity
     public string ColorHex { get; private set; } = "#FFFFFF";
     public string? Icon { get; private set; }
     public Guid? ParentCategoryId { get; private set; }
+    public string UserId { get; private set; } = null!;
 
     // Navigation properties for EF Core
     public Category? ParentCategory { get; private set; }
@@ -19,6 +20,7 @@ public class Category : BaseEntity
 
     public Category(
         string name, 
+        string userId,
         string colorHex = "#FFFFFF", 
         string? icon = null, 
         Guid? parentCategoryId = null)
@@ -26,7 +28,11 @@ public class Category : BaseEntity
         if (string.IsNullOrWhiteSpace(name))
             throw new ArgumentException("Category name cannot be empty.", nameof(name));
 
+        if (string.IsNullOrWhiteSpace(userId))
+            throw new ArgumentException("User ID cannot be empty.", nameof(userId));
+
         Name = name.Trim();
+        UserId = userId;
         ColorHex = colorHex;
         Icon = icon?.Trim();
         ParentCategoryId = parentCategoryId;

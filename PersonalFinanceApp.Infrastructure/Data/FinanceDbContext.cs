@@ -33,5 +33,11 @@ public class FinanceDbContext : IdentityDbContext<ApplicationUser>, IApplication
             
         modelBuilder.Entity<Transaction>()
             .HasQueryFilter(t => _currentUserService.IsAdmin || t.UserId == _currentUserService.UserId);
+
+        modelBuilder.Entity<Category>()
+            .HasQueryFilter(c => _currentUserService.IsAdmin || c.UserId == _currentUserService.UserId);
+
+        modelBuilder.Entity<Tag>()
+            .HasQueryFilter(t => _currentUserService.IsAdmin || t.UserId == _currentUserService.UserId);
     }
 }
