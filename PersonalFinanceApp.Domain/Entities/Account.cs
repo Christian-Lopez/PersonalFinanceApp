@@ -82,4 +82,19 @@ public class Account : BaseEntity
 
         UpdatedAtUtc = DateTime.UtcNow;
     }
+
+    public void ReverseTransaction(TransactionType type, decimal amount)
+    {
+        if (amount <= 0)
+            throw new ArgumentException("Transaction amount must be positive.", nameof(amount));
+
+        CurrentBalance = type switch
+        {
+            TransactionType.Income => CurrentBalance - amount,
+            TransactionType.Expense => CurrentBalance + amount,
+            _ => CurrentBalance
+        };
+
+        UpdatedAtUtc = DateTime.UtcNow;
+    }
 }

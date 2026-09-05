@@ -36,6 +36,19 @@ public class Transaction : BaseEntity
         CategoryId = categoryId;
         CreatedAtUtc = DateTime.UtcNow;
     }
+    public void Update(decimal amount, TransactionType type, DateTime transactionDate, string? description, Guid? categoryId)
+    {
+        if (amount <= 0)
+            throw new ArgumentException("Amount must be strictly positive.", nameof(amount));
+
+        Amount = amount;
+        Type = type;
+        TransactionDate = transactionDate.ToUniversalTime();
+        Description = description?.Trim();
+        CategoryId = categoryId;
+        SetUpdated();
+    }
+
     // For tags:
 
     private readonly List<Tag> _tags = [];
