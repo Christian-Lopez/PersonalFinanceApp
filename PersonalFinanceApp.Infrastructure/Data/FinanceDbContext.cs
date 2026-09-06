@@ -39,5 +39,26 @@ public class FinanceDbContext : IdentityDbContext<ApplicationUser>, IApplication
 
         modelBuilder.Entity<Tag>()
             .HasQueryFilter(t => _currentUserService.IsAdmin || t.UserId == _currentUserService.UserId);
+
+        // Seed Admin User
+        var adminId = "00000000-0000-0000-0000-000000000001";
+        var adminUser = new ApplicationUser
+        {
+            Id = adminId,
+            UserName = "admin@example.com",
+            NormalizedUserName = "ADMIN@EXAMPLE.COM",
+            Email = "admin@example.com",
+            NormalizedEmail = "ADMIN@EXAMPLE.COM",
+            EmailConfirmed = true,
+            FirstName = "System",
+            LastName = "Admin",
+            SecurityStamp = "A70E28B0-8CAE-4DEE-BE39-C79178E89086",
+            IsActive = true,
+            CreatedAtUtc = DateTime.Parse("2025-01-01T00:00:00Z").ToUniversalTime()
+        };
+        
+        adminUser.PasswordHash = "AQAAAAIAAYagAAAAEJqMnnZQkjVdnMLhJYvR83GrrwZW12KF6ikdfHShxEkC4g0xzvPJqXrvmAWk8xgilg==";
+        
+        modelBuilder.Entity<ApplicationUser>().HasData(adminUser);
     }
 }

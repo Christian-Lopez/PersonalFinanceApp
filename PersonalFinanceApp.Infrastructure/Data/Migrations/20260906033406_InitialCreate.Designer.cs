@@ -12,8 +12,8 @@ using PersonalFinanceApp.Infrastructure.Data;
 namespace PersonalFinanceApp.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(FinanceDbContext))]
-    [Migration("20260905045231_AddTenantIsolationToCategoriesAndTags")]
-    partial class AddTenantIsolationToCategoriesAndTags
+    [Migration("20260906033406_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -397,6 +397,29 @@ namespace PersonalFinanceApp.Infrastructure.Data.Migrations
                         .HasDatabaseName("UserNameIndex");
 
                     b.ToTable("AspNetUsers", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = "00000000-0000-0000-0000-000000000001",
+                            AccessFailedCount = 0,
+                            ConcurrencyStamp = "f72408fd-6006-4cd8-8ce3-e34c42c6a3f9",
+                            CreatedAtUtc = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DefaultCurrency = "USD",
+                            Email = "admin@example.com",
+                            EmailConfirmed = true,
+                            FirstName = "System",
+                            IsActive = true,
+                            LastName = "Admin",
+                            LockoutEnabled = false,
+                            NormalizedEmail = "ADMIN@EXAMPLE.COM",
+                            NormalizedUserName = "ADMIN@EXAMPLE.COM",
+                            PasswordHash = "AQAAAAIAAYagAAAAEJqMnnZQkjVdnMLhJYvR83GrrwZW12KF6ikdfHShxEkC4g0xzvPJqXrvmAWk8xgilg==",
+                            PhoneNumberConfirmed = false,
+                            SecurityStamp = "A70E28B0-8CAE-4DEE-BE39-C79178E89086",
+                            TwoFactorEnabled = false,
+                            UserName = "admin@example.com"
+                        });
                 });
 
             modelBuilder.Entity("TagTransaction", b =>

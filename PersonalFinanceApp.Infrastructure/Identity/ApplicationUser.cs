@@ -8,5 +8,5 @@ public class ApplicationUser : IdentityUser
     public string LastName { get; set; } = null!;
     public string DefaultCurrency { get; set; } = "USD";
     public bool IsActive { get; set; } = true;
-    public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
+    public DateTime CreatedAtUtc { get; set; }
 }
