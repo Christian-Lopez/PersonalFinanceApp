@@ -6,6 +6,8 @@ using PersonalFinanceApp.Application.Features.Transactions.Commands.UpdateTransa
 using PersonalFinanceApp.Application.Features.Transactions.Commands.DeleteTransaction;
 using PersonalFinanceApp.Application.Features.Transactions.Queries.GetTransactions;
 
+using PersonalFinanceApp.Application.Features.Transactions.Commands.CreateTransfer;
+
 namespace PersonalFinanceApp.Api.Controllers;
 
 [Authorize]
@@ -32,6 +34,13 @@ public class TransactionsController : ControllerBase
     {
         var transactionId = await _sender.Send(command);
         return CreatedAtAction(nameof(GetTransactions), new { accountId = command.AccountId }, transactionId);
+    }
+
+    [HttpPost("transfer")]
+    public async Task<IActionResult> CreateTransfer([FromBody] CreateTransferCommand command)
+    {
+        await _sender.Send(command);
+        return Ok();
     }
 
     [HttpPut("{id}")]
