@@ -61,6 +61,20 @@ public class FinanceDbContext : IdentityDbContext<ApplicationUser>, IApplication
         
         modelBuilder.Entity<ApplicationUser>().HasData(adminUser);
 
+        var adminRoleId = "00000000-0000-0000-0000-000000000002";
+        modelBuilder.Entity<Microsoft.AspNetCore.Identity.IdentityRole>().HasData(new Microsoft.AspNetCore.Identity.IdentityRole
+        {
+            Id = adminRoleId,
+            Name = "Admin",
+            NormalizedName = "ADMIN"
+        });
+
+        modelBuilder.Entity<Microsoft.AspNetCore.Identity.IdentityUserRole<string>>().HasData(new Microsoft.AspNetCore.Identity.IdentityUserRole<string>
+        {
+            RoleId = adminRoleId,
+            UserId = adminId
+        });
+
         // Seed Global Categories (UserId is null)
         modelBuilder.Entity<Category>().HasData(
 new { Id = Guid.Parse("cca984db-acc2-4025-9fbf-42403506eab4"), Name = "Children", ColorHex = "#3B82F6", Icon = (string?)null, ParentCategoryId = (Guid?)null, UserId = (string?)null, CreatedAtUtc = DateTime.Parse("2025-01-01T00:00:00Z").ToUniversalTime(), UpdatedAtUtc = (DateTime?)null },
