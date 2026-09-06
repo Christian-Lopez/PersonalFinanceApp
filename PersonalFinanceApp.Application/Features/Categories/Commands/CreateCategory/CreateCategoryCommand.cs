@@ -9,7 +9,8 @@ public record CreateCategoryCommand(
     string Name,
     string ColorHex,
     string? Icon,
-    Guid? ParentCategoryId
+    Guid? ParentCategoryId,
+    bool IsSystem = false
 ) : IRequest<Guid>;
 
 public class CreateCategoryCommandValidator : AbstractValidator<CreateCategoryCommand>
@@ -34,11 +35,21 @@ public class CreateCategoryCommandHandler : IRequestHandler<CreateCategoryComman
 
     public async Task<Guid> Handle(CreateCategoryCommand request, CancellationToken cancellationToken)
     {
-        var userId = _currentUserService.UserId ?? throw new UnauthorizedAccessException();
+        var currentUserId = _currentUserService.UserId ?? throw new UnauthorizedAccessException();
+
+        // If user requests a system category, verify they are an admin
+        string? targetUserId = currentUserId;
+        if (request.IsSystem)
+        {
+            if (!_currentUserService.IsAdmin)
+                throw new UnauthorizedAccessException("Only administrators can create system categories.");
+            
+            targetUserId = null;
+        }
 
         var category = new Category(
             request.Name,
-            userId,
+            targetUserId,
             request.ColorHex,
             request.Icon,
             request.ParentCategoryId
