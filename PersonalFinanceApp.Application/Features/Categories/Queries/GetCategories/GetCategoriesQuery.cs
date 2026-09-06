@@ -13,6 +13,7 @@ public class CategoryDto
     public string ColorHex { get; init; } = null!;
     public string? Icon { get; init; }
     public Guid? ParentCategoryId { get; init; }
+    public bool IsSystem { get; init; }
 }
 
 public class GetCategoriesQueryHandler : IRequestHandler<GetCategoriesQuery, List<CategoryDto>>
@@ -34,7 +35,8 @@ public class GetCategoriesQueryHandler : IRequestHandler<GetCategoriesQuery, Lis
                 Name = c.Name,
                 ColorHex = c.ColorHex,
                 Icon = c.Icon,
-                ParentCategoryId = c.ParentCategoryId
+                ParentCategoryId = c.ParentCategoryId,
+                IsSystem = c.UserId == null
             })
             .ToListAsync(cancellationToken);
     }
