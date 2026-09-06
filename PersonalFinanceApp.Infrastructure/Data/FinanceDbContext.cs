@@ -75,6 +75,40 @@ public class FinanceDbContext : IdentityDbContext<ApplicationUser>, IApplication
             UserId = adminId
         });
 
+        // Seed Regular User
+        var regularUserId = "00000000-0000-0000-0000-000000000003";
+        var regularUser = new ApplicationUser
+        {
+            Id = regularUserId,
+            UserName = "user@example.com",
+            NormalizedUserName = "USER@EXAMPLE.COM",
+            Email = "user@example.com",
+            NormalizedEmail = "USER@EXAMPLE.COM",
+            EmailConfirmed = true,
+            FirstName = "Test",
+            LastName = "User",
+            SecurityStamp = "B70E28B0-8CAE-4DEE-BE39-C79178E89087",
+            IsActive = true,
+            CreatedAtUtc = DateTime.Parse("2025-01-01T00:00:00Z").ToUniversalTime()
+        };
+        regularUser.PasswordHash = "AQAAAAIAAYagAAAAEJqMnnZQkjVdnMLhJYvR83GrrwZW12KF6ikdfHShxEkC4g0xzvPJqXrvmAWk8xgilg=="; // Same password
+        
+        modelBuilder.Entity<ApplicationUser>().HasData(regularUser);
+
+        var regularRoleId = "00000000-0000-0000-0000-000000000004";
+        modelBuilder.Entity<Microsoft.AspNetCore.Identity.IdentityRole>().HasData(new Microsoft.AspNetCore.Identity.IdentityRole
+        {
+            Id = regularRoleId,
+            Name = "User",
+            NormalizedName = "USER"
+        });
+
+        modelBuilder.Entity<Microsoft.AspNetCore.Identity.IdentityUserRole<string>>().HasData(new Microsoft.AspNetCore.Identity.IdentityUserRole<string>
+        {
+            RoleId = regularRoleId,
+            UserId = regularUserId
+        });
+
         // Seed Global Categories (UserId is null)
         modelBuilder.Entity<Category>().HasData(
 new { Id = Guid.Parse("cca984db-acc2-4025-9fbf-42403506eab4"), Name = "Children", ColorHex = "#3B82F6", Icon = (string?)null, ParentCategoryId = (Guid?)null, UserId = (string?)null, CreatedAtUtc = DateTime.Parse("2025-01-01T00:00:00Z").ToUniversalTime(), UpdatedAtUtc = (DateTime?)null },
