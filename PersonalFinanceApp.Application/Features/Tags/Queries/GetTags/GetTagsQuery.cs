@@ -10,6 +10,7 @@ public class TagDto
 {
     public Guid Id { get; init; }
     public string Name { get; init; } = null!;
+    public bool IsSystem { get; init; }
 }
 
 public class GetTagsQueryHandler : IRequestHandler<GetTagsQuery, List<TagDto>>
@@ -28,7 +29,8 @@ public class GetTagsQueryHandler : IRequestHandler<GetTagsQuery, List<TagDto>>
             .Select(t => new TagDto
             {
                 Id = t.Id,
-                Name = t.Name
+                Name = t.Name,
+                IsSystem = t.UserId == null
             })
             .ToListAsync(cancellationToken);
     }

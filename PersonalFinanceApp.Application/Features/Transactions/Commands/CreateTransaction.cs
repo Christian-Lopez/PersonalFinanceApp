@@ -13,7 +13,8 @@ public record CreateTransactionCommand(
     TransactionType Type,
     DateTime TransactionDate,
     string? Description,
-    Guid? CategoryId
+    Guid? CategoryId,
+    List<Guid>? TagIds = null
 ) : IRequest<Guid>;
 
 public class CreateTransactionCommandValidator : AbstractValidator<CreateTransactionCommand>
@@ -45,7 +46,6 @@ public class CreateTransactionCommandHandler : IRequestHandler<CreateTransaction
         var userId = _currentUserService.UserId 
             ?? throw new UnauthorizedAccessException();
 
-        // The query filter automatically ensures the user owns this account
         var account = await _context.Accounts
             .FirstOrDefaultAsync(a => a.Id == request.AccountId, cancellationToken)
             ?? throw new ArgumentException($"Account {request.AccountId} not found.");
@@ -60,7 +60,18 @@ public class CreateTransactionCommandHandler : IRequestHandler<CreateTransaction
             request.CategoryId
         );
 
-        // Synchronize balance atomically within the same transaction scope
+        if (request.TagIds != null && request.TagIds.Any())
+        {
+            var tags = await _context.Tags
+                .Where(t => request.TagIds.Contains(t.Id))
+                .ToListAsync(cancellationToken);
+                
+            foreach(var tag in tags) 
+            {
+                transaction.AddTag(tag);
+            }
+        }
+
         account.ApplyTransaction(request.Type, request.Amount);
 
         _context.Transactions.Add(transaction);

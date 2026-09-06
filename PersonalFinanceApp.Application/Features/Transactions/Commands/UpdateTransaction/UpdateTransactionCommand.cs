@@ -12,7 +12,8 @@ public record UpdateTransactionCommand(
     TransactionType Type,
     DateTime TransactionDate,
     string? Description,
-    Guid? CategoryId
+    Guid? CategoryId,
+    List<Guid>? TagIds = null
 ) : IRequest;
 
 public class UpdateTransactionCommandValidator : AbstractValidator<UpdateTransactionCommand>
@@ -39,6 +40,7 @@ public class UpdateTransactionCommandHandler : IRequestHandler<UpdateTransaction
     {
         var transaction = await _context.Transactions
             .Include(t => t.Account)
+            .Include(t => t.Tags)
             .FirstOrDefaultAsync(t => t.Id == request.Id, cancellationToken)
             ?? throw new ArgumentException($"Transaction {request.Id} not found.");
 
@@ -56,6 +58,26 @@ public class UpdateTransactionCommandHandler : IRequestHandler<UpdateTransaction
             request.Description,
             request.CategoryId
         );
+
+        // Sync tags
+        var existingTagIds = transaction.Tags.Select(t => t.Id).ToList();
+        var requestedTagIds = request.TagIds ?? new List<Guid>();
+
+        var tagsToRemove = existingTagIds.Except(requestedTagIds).ToList();
+        foreach(var tagId in tagsToRemove)
+        {
+            transaction.RemoveTag(tagId);
+        }
+
+        var tagsToAddIds = requestedTagIds.Except(existingTagIds).ToList();
+        if (tagsToAddIds.Any())
+        {
+            var tagsToAdd = await _context.Tags.Where(t => tagsToAddIds.Contains(t.Id)).ToListAsync(cancellationToken);
+            foreach(var tag in tagsToAdd)
+            {
+                transaction.AddTag(tag);
+            }
+        }
 
         await _context.SaveChangesAsync(cancellationToken);
     }

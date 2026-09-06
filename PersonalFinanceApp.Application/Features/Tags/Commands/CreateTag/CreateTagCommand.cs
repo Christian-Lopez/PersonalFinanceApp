@@ -5,13 +5,16 @@ using PersonalFinanceApp.Domain.Entities;
 
 namespace PersonalFinanceApp.Application.Features.Tags.Commands.CreateTag;
 
-public record CreateTagCommand(string Name) : IRequest<Guid>;
+public record CreateTagCommand(
+    string Name,
+    bool IsSystem = false
+) : IRequest<Guid>;
 
 public class CreateTagCommandValidator : AbstractValidator<CreateTagCommand>
 {
     public CreateTagCommandValidator()
     {
-        RuleFor(x => x.Name).NotEmpty();
+        RuleFor(x => x.Name).NotEmpty().MaximumLength(50);
     }
 }
 
@@ -28,9 +31,18 @@ public class CreateTagCommandHandler : IRequestHandler<CreateTagCommand, Guid>
 
     public async Task<Guid> Handle(CreateTagCommand request, CancellationToken cancellationToken)
     {
-        var userId = _currentUserService.UserId ?? throw new UnauthorizedAccessException();
+        var currentUserId = _currentUserService.UserId ?? throw new UnauthorizedAccessException();
 
-        var tag = new Tag(request.Name, userId);
+        string? targetUserId = currentUserId;
+        if (request.IsSystem)
+        {
+            if (!_currentUserService.IsAdmin)
+                throw new UnauthorizedAccessException("Only administrators can create system tags.");
+            
+            targetUserId = null;
+        }
+
+        var tag = new Tag(request.Name, targetUserId);
 
         _context.Tags.Add(tag);
         await _context.SaveChangesAsync(cancellationToken);

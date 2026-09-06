@@ -14,6 +14,13 @@ public class TransactionDto
     public DateTime TransactionDate { get; init; }
     public string? Description { get; init; }
     public Guid? CategoryId { get; init; }
+    public List<TransactionTagDto> Tags { get; init; } = [];
+}
+
+public class TransactionTagDto
+{
+    public Guid Id { get; init; }
+    public string Name { get; init; } = null!;
 }
 
 public class GetTransactionsQueryHandler : IRequestHandler<GetTransactionsQuery, List<TransactionDto>>
@@ -45,7 +52,12 @@ public class GetTransactionsQueryHandler : IRequestHandler<GetTransactionsQuery,
                 Type = t.Type.ToString(),
                 TransactionDate = t.TransactionDate,
                 Description = t.Description,
-                CategoryId = t.CategoryId
+                CategoryId = t.CategoryId,
+                Tags = t.Tags.Select(tag => new TransactionTagDto
+                {
+                    Id = tag.Id,
+                    Name = tag.Name
+                }).ToList()
             })
             .ToListAsync(cancellationToken);
     }

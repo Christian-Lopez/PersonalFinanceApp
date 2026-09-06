@@ -2,8 +2,8 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PersonalFinanceApp.Application.Features.Tags.Commands.CreateTag;
-using PersonalFinanceApp.Application.Features.Tags.Commands.UpdateTag;
 using PersonalFinanceApp.Application.Features.Tags.Commands.DeleteTag;
+using PersonalFinanceApp.Application.Features.Tags.Commands.UpdateTag;
 using PersonalFinanceApp.Application.Features.Tags.Queries.GetTags;
 
 namespace PersonalFinanceApp.Api.Controllers;
@@ -30,17 +30,15 @@ public class TagsController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> CreateTag([FromBody] CreateTagCommand command)
     {
-        var tagId = await _sender.Send(command);
-        return CreatedAtAction(nameof(GetTags), new { id = tagId }, tagId);
+        var id = await _sender.Send(command);
+        return CreatedAtAction(nameof(GetTags), new { id }, id);
     }
 
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateTag(Guid id, [FromBody] UpdateTagCommand command)
     {
         if (id != command.Id)
-        {
-            return BadRequest("Tag ID mismatch.");
-        }
+            return BadRequest("ID in URL does not match ID in body.");
 
         await _sender.Send(command);
         return NoContent();
