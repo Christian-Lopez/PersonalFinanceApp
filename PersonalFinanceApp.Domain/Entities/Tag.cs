@@ -5,7 +5,7 @@ namespace PersonalFinanceApp.Domain.Entities;
 public class Tag : BaseEntity
 {
     public string Name { get; private set; } = string.Empty;
-    public string UserId { get; private set; } = null!;
+    public string? UserId { get; private set; }
 
     // Navigation property for EF Core many-to-many
     private readonly List<Transaction> _transactions = [];
@@ -13,13 +13,10 @@ public class Tag : BaseEntity
 
     private Tag() { }
 
-    public Tag(string name, string userId)
+    public Tag(string name, string? userId = null)
     {
         if (string.IsNullOrWhiteSpace(name))
             throw new ArgumentException("Tag name cannot be empty.", nameof(name));
-
-        if (string.IsNullOrWhiteSpace(userId))
-            throw new ArgumentException("User ID cannot be empty.", nameof(userId));
 
         // Enforce normalized formatting (e.g., lowercase without '#')
         Name = name.Trim().TrimStart('#').ToLowerInvariant();

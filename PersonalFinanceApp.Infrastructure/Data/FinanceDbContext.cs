@@ -35,10 +35,10 @@ public class FinanceDbContext : IdentityDbContext<ApplicationUser>, IApplication
             .HasQueryFilter(t => _currentUserService.IsAdmin || t.UserId == _currentUserService.UserId);
 
         modelBuilder.Entity<Category>()
-            .HasQueryFilter(c => _currentUserService.IsAdmin || c.UserId == _currentUserService.UserId);
+            .HasQueryFilter(c => c.UserId == null || _currentUserService.IsAdmin || c.UserId == _currentUserService.UserId);
 
         modelBuilder.Entity<Tag>()
-            .HasQueryFilter(t => _currentUserService.IsAdmin || t.UserId == _currentUserService.UserId);
+            .HasQueryFilter(t => t.UserId == null || _currentUserService.IsAdmin || t.UserId == _currentUserService.UserId);
 
         // Seed Admin User
         var adminId = "00000000-0000-0000-0000-000000000001";
@@ -60,5 +60,14 @@ public class FinanceDbContext : IdentityDbContext<ApplicationUser>, IApplication
         adminUser.PasswordHash = "AQAAAAIAAYagAAAAEJqMnnZQkjVdnMLhJYvR83GrrwZW12KF6ikdfHShxEkC4g0xzvPJqXrvmAWk8xgilg==";
         
         modelBuilder.Entity<ApplicationUser>().HasData(adminUser);
+
+        // Seed Global Categories (UserId is null)
+        modelBuilder.Entity<Category>().HasData(
+            new { Id = Guid.Parse("10000000-0000-0000-0000-000000000001"), Name = "Housing", ColorHex = "#3B82F6", UserId = (string?)null, CreatedAtUtc = DateTime.Parse("2025-01-01T00:00:00Z").ToUniversalTime() },
+            new { Id = Guid.Parse("10000000-0000-0000-0000-000000000002"), Name = "Food & Dining", ColorHex = "#10B981", UserId = (string?)null, CreatedAtUtc = DateTime.Parse("2025-01-01T00:00:00Z").ToUniversalTime() },
+            new { Id = Guid.Parse("10000000-0000-0000-0000-000000000003"), Name = "Transportation", ColorHex = "#F59E0B", UserId = (string?)null, CreatedAtUtc = DateTime.Parse("2025-01-01T00:00:00Z").ToUniversalTime() },
+            new { Id = Guid.Parse("10000000-0000-0000-0000-000000000004"), Name = "Utilities", ColorHex = "#8B5CF6", UserId = (string?)null, CreatedAtUtc = DateTime.Parse("2025-01-01T00:00:00Z").ToUniversalTime() },
+            new { Id = Guid.Parse("10000000-0000-0000-0000-000000000005"), Name = "Income", ColorHex = "#059669", UserId = (string?)null, CreatedAtUtc = DateTime.Parse("2025-01-01T00:00:00Z").ToUniversalTime() }
+        );
     }
 }
