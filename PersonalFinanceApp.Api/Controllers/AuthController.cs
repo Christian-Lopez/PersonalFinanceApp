@@ -63,4 +63,17 @@ public class AuthController : ControllerBase
 
         return Ok(result);
     }
+
+    [Microsoft.AspNetCore.Authorization.Authorize]
+    [HttpPost("change-password")]
+    public async Task<IActionResult> ChangePassword([FromBody] PersonalFinanceApp.Application.Features.Auth.Commands.ChangePassword.ChangePasswordCommand command)
+    {
+        var result = await _sender.Send(command);
+        if (!result.Succeeded)
+        {
+            return BadRequest(new { errors = result.Errors });
+        }
+
+        return Ok(result);
+    }
 }

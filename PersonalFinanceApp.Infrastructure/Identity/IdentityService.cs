@@ -122,6 +122,24 @@ public class IdentityService : IIdentityService
 
         return new AuthResult(true, null, null, null, Enumerable.Empty<string>());
     }
+
+    public async Task<AuthResult> ChangePasswordAsync(string userId, string currentPassword, string newPassword, CancellationToken cancellationToken = default)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null)
+        {
+            return new AuthResult(false, null, null, null, new[] { "User not found." });
+        }
+
+        var result = await _userManager.ChangePasswordAsync(user, currentPassword, newPassword);
+        if (!result.Succeeded)
+        {
+            return new AuthResult(false, null, null, null, result.Errors.Select(e => e.Description));
+        }
+
+        return new AuthResult(true, null, null, null, Enumerable.Empty<string>());
+    }
+
     private async Task<string> GenerateJwtTokenAsync(ApplicationUser user)
     {
         var roles = await _userManager.GetRolesAsync(user);

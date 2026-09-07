@@ -20,4 +20,6 @@ public interface IIdentityService
     Task<AuthResult> ForgotPasswordAsync(string email, CancellationToken cancellationToken = default);
     
     Task<AuthResult> ResetPasswordAsync(string email, string token, string newPassword, CancellationToken cancellationToken = default);
+
+    Task<AuthResult> ChangePasswordAsync(string userId, string currentPassword, string newPassword, CancellationToken cancellationToken = default);
 }
