@@ -39,4 +39,28 @@ public class AuthController : ControllerBase
 
         return Ok(result);
     }
+
+    [HttpPost("forgot-password")]
+    public async Task<IActionResult> ForgotPassword([FromBody] PersonalFinanceApp.Application.Features.Auth.Commands.ForgotPassword.ForgotPasswordCommand command)
+    {
+        var result = await _sender.Send(command);
+        if (!result.Succeeded)
+        {
+            return BadRequest(new { errors = result.Errors });
+        }
+
+        return Ok(result);
+    }
+
+    [HttpPost("reset-password")]
+    public async Task<IActionResult> ResetPassword([FromBody] PersonalFinanceApp.Application.Features.Auth.Commands.ResetPassword.ResetPasswordCommand command)
+    {
+        var result = await _sender.Send(command);
+        if (!result.Succeeded)
+        {
+            return BadRequest(new { errors = result.Errors });
+        }
+
+        return Ok(result);
+    }
 }

@@ -16,4 +16,8 @@ public interface IIdentityService
         string email, 
         string password, 
         CancellationToken cancellationToken = default);
+
+    Task<AuthResult> ForgotPasswordAsync(string email, CancellationToken cancellationToken = default);
+    
+    Task<AuthResult> ResetPasswordAsync(string email, string token, string newPassword, CancellationToken cancellationToken = default);
 }

@@ -41,4 +41,16 @@ public class ReportsController : ControllerBase
         var spending = await _sender.Send(new GetCategorySpendingQuery(year, month, accountId));
         return Ok(spending);
     }
+
+    [HttpGet("trend")]
+    public async Task<IActionResult> GetTrend([FromQuery] int months = 6, [FromQuery] Guid? accountId = null)
+    {
+        if (months < 1 || months > 60)
+        {
+            return BadRequest("Months must be between 1 and 60.");
+        }
+
+        var trend = await _sender.Send(new PersonalFinanceApp.Application.Features.Reports.Queries.GetTrend.GetTrendQuery(months, accountId));
+        return Ok(trend);
+    }
 }

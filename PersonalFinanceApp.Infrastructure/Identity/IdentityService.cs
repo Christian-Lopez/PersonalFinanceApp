@@ -87,6 +87,41 @@ public class IdentityService : IIdentityService
         return new AuthResult(true, token, user.Id, user.Email, Enumerable.Empty<string>());
     }
 
+    public async Task<AuthResult> ForgotPasswordAsync(string email, CancellationToken cancellationToken = default)
+    {
+        var user = await _userManager.FindByEmailAsync(email);
+        if (user == null || !user.IsActive)
+        {
+            // Do not reveal that the user does not exist for security reasons
+            return new AuthResult(true, null, null, null, Enumerable.Empty<string>());
+        }
+
+        var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+        
+        // In a real application, you would send an email here.
+        // For development purposes, we will log it to the console.
+        Console.WriteLine($"\n\n=== PASSWORD RESET TOKEN FOR {email} ===\n{token}\n=======================================\n\n");
+        
+        // We can pass the token back in the dev environment for easy testing, but in production this should be sent via email.
+        return new AuthResult(true, token, null, null, Enumerable.Empty<string>());
+    }
+
+    public async Task<AuthResult> ResetPasswordAsync(string email, string token, string newPassword, CancellationToken cancellationToken = default)
+    {
+        var user = await _userManager.FindByEmailAsync(email);
+        if (user == null)
+        {
+            return new AuthResult(false, null, null, null, new[] { "Invalid request." });
+        }
+
+        var result = await _userManager.ResetPasswordAsync(user, token, newPassword);
+        if (!result.Succeeded)
+        {
+            return new AuthResult(false, null, null, null, result.Errors.Select(e => e.Description));
+        }
+
+        return new AuthResult(true, null, null, null, Enumerable.Empty<string>());
+    }
     private async Task<string> GenerateJwtTokenAsync(ApplicationUser user)
     {
         var roles = await _userManager.GetRolesAsync(user);
