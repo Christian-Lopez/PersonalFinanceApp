@@ -14,15 +14,18 @@ public class IdentityService : IIdentityService
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly RoleManager<IdentityRole> _roleManager;
     private readonly JwtSettings _jwtSettings;
+    private readonly IEmailService _emailService;
 
     public IdentityService(
         UserManager<ApplicationUser> userManager,
         RoleManager<IdentityRole> roleManager,
-        IOptions<JwtSettings> jwtOptions)
+        IOptions<JwtSettings> jwtOptions,
+        IEmailService emailService)
     {
         _userManager = userManager;
         _roleManager = roleManager;
         _jwtSettings = jwtOptions.Value;
+        _emailService = emailService;
     }
 
     public async Task<AuthResult> RegisterAsync(
@@ -63,9 +66,26 @@ public class IdentityService : IIdentityService
         }
         await _userManager.AddToRoleAsync(user, "User");
 
-        var token = await GenerateJwtTokenAsync(user);
+        // Generate email confirmation token
+        var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+        
+        // Send email
+        var encodedEmail = System.Web.HttpUtility.UrlEncode(email);
+        var encodedToken = System.Web.HttpUtility.UrlEncode(token);
+        var verifyLink = $"http://localhost:5173/verify-email?email={encodedEmail}&token={encodedToken}";
+        
+        var htmlBody = $@"
+            <h2>Welcome to Personal Finance App!</h2>
+            <p>Hi {firstName},</p>
+            <p>Please confirm your email address by clicking the link below:</p>
+            <p><a href='{verifyLink}'>Verify Email</a></p>
+            <br/>
+            <p>If you did not request this, you can safely ignore this email.</p>";
 
-        return new AuthResult(true, token, user.Id, user.Email, Enumerable.Empty<string>());
+        await _emailService.SendEmailAsync(email, "Verify Your Email - Personal Finance App", htmlBody, cancellationToken);
+
+        // Do not log them in automatically - return success but null token
+        return new AuthResult(true, null, user.Id, user.Email, Enumerable.Empty<string>());
     }
 
     public async Task<AuthResult> LoginAsync(string email, string password, CancellationToken cancellationToken = default)
@@ -74,6 +94,11 @@ public class IdentityService : IIdentityService
         if (user == null || !user.IsActive)
         {
             return new AuthResult(false, null, null, null, new[] { "Invalid email or password." });
+        }
+
+        if (!await _userManager.IsEmailConfirmedAsync(user))
+        {
+            return new AuthResult(false, null, null, null, new[] { "EmailNotConfirmed: Please verify your email before logging in." });
         }
 
         var isPasswordValid = await _userManager.CheckPasswordAsync(user, password);
@@ -87,6 +112,23 @@ public class IdentityService : IIdentityService
         return new AuthResult(true, token, user.Id, user.Email, Enumerable.Empty<string>());
     }
 
+    public async Task<AuthResult> ConfirmEmailAsync(string email, string token, CancellationToken cancellationToken = default)
+    {
+        var user = await _userManager.FindByEmailAsync(email);
+        if (user == null)
+        {
+            return new AuthResult(false, null, null, null, new[] { "Invalid email." });
+        }
+
+        var result = await _userManager.ConfirmEmailAsync(user, token);
+        if (!result.Succeeded)
+        {
+            return new AuthResult(false, null, null, null, result.Errors.Select(e => e.Description));
+        }
+
+        return new AuthResult(true, null, null, null, Enumerable.Empty<string>());
+    }
+
     public async Task<AuthResult> ForgotPasswordAsync(string email, CancellationToken cancellationToken = default)
     {
         var user = await _userManager.FindByEmailAsync(email);
@@ -98,12 +140,21 @@ public class IdentityService : IIdentityService
 
         var token = await _userManager.GeneratePasswordResetTokenAsync(user);
         
-        // In a real application, you would send an email here.
-        // For development purposes, we will log it to the console.
-        Console.WriteLine($"\n\n=== PASSWORD RESET TOKEN FOR {email} ===\n{token}\n=======================================\n\n");
+        var encodedEmail = System.Web.HttpUtility.UrlEncode(email);
+        var encodedToken = System.Web.HttpUtility.UrlEncode(token);
+        var resetLink = $"http://localhost:5173/reset-password?email={encodedEmail}&token={encodedToken}";
+
+        var htmlBody = $@"
+            <h2>Password Reset Request</h2>
+            <p>We received a request to reset your password.</p>
+            <p>Click the link below to set a new password:</p>
+            <p><a href='{resetLink}'>Reset Password</a></p>
+            <br/>
+            <p>If you did not request this, you can safely ignore this email.</p>";
+
+        await _emailService.SendEmailAsync(email, "Password Reset Request", htmlBody, cancellationToken);
         
-        // We can pass the token back in the dev environment for easy testing, but in production this should be sent via email.
-        return new AuthResult(true, token, null, null, Enumerable.Empty<string>());
+        return new AuthResult(true, null, null, null, Enumerable.Empty<string>());
     }
 
     public async Task<AuthResult> ResetPasswordAsync(string email, string token, string newPassword, CancellationToken cancellationToken = default)

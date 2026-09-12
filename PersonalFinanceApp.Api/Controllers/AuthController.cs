@@ -76,4 +76,16 @@ public class AuthController : ControllerBase
 
         return Ok(result);
     }
+
+    [HttpPost("verify-email")]
+    public async Task<IActionResult> VerifyEmail([FromBody] PersonalFinanceApp.Application.Features.Auth.Commands.ConfirmEmail.ConfirmEmailCommand command)
+    {
+        var result = await _sender.Send(command);
+        if (!result.Succeeded)
+        {
+            return BadRequest(new { errors = result.Errors });
+        }
+
+        return Ok(result);
+    }
 }

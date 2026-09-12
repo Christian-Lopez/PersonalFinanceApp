@@ -9,6 +9,7 @@ using PersonalFinanceApp.Api.Services;
 using PersonalFinanceApp.Application.Common.Behaviors;
 using PersonalFinanceApp.Application.Common.Interfaces;
 using PersonalFinanceApp.Infrastructure.Data;
+using PersonalFinanceApp.Infrastructure.Email;
 using PersonalFinanceApp.Infrastructure.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -83,6 +84,10 @@ builder.Services.AddAuthentication(options =>
 
 // 8. Identity Service Registration
 builder.Services.AddScoped<IIdentityService, IdentityService>();
+
+// 9. Email Service Registration
+builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
+builder.Services.AddTransient<IEmailService, SmtpEmailService>();
 
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
