@@ -106,6 +106,13 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
+// Auto-migrate the database on startup
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<FinanceDbContext>();
+    dbContext.Database.Migrate();
+}
+
 // HTTP Pipeline Configuration
 app.UseExceptionHandler();
 
