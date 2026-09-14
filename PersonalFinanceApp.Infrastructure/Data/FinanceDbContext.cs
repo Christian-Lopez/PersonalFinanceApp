@@ -21,6 +21,7 @@ public class FinanceDbContext : IdentityDbContext<ApplicationUser>, IApplication
     public DbSet<Transaction> Transactions => Set<Transaction>();
     public DbSet<Category> Categories => Set<Category>();
     public DbSet<Tag> Tags => Set<Tag>();
+    public DbSet<RecurringTransaction> RecurringTransactions => Set<RecurringTransaction>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -39,6 +40,9 @@ public class FinanceDbContext : IdentityDbContext<ApplicationUser>, IApplication
 
         modelBuilder.Entity<Tag>()
             .HasQueryFilter(t => t.UserId == null || _currentUserService.IsAdmin || t.UserId == _currentUserService.UserId);
+
+        modelBuilder.Entity<RecurringTransaction>()
+            .HasQueryFilter(rt => _currentUserService.IsAdmin || rt.UserId == _currentUserService.UserId);
 
         // Seed Admin User
         var adminId = "00000000-0000-0000-0000-000000000001";
