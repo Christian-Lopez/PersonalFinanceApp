@@ -12,6 +12,7 @@ public class Transaction : BaseEntity
     public DateTime TransactionDate { get; private set; }
     public string? Description { get; private set; }
     public Guid? CategoryId { get; private set; }
+    public string? ReferenceId { get; private set; } // Used to prevent duplicate recurring transactions
 
     // Navigation properties
     public Account Account { get; private set; } = null!;
@@ -19,7 +20,7 @@ public class Transaction : BaseEntity
 
     private Transaction() { }
 
-    public Transaction(string userId, Guid accountId, decimal amount, TransactionType type, DateTime transactionDate, string? description = null, Guid? categoryId = null)
+    public Transaction(string userId, Guid accountId, decimal amount, TransactionType type, DateTime transactionDate, string? description = null, Guid? categoryId = null, string? referenceId = null)
     {
         if (string.IsNullOrWhiteSpace(userId))
             throw new ArgumentException("User ID cannot be empty.", nameof(userId));
@@ -34,6 +35,7 @@ public class Transaction : BaseEntity
         TransactionDate = transactionDate.ToUniversalTime();
         Description = description?.Trim();
         CategoryId = categoryId;
+        ReferenceId = referenceId;
         CreatedAtUtc = DateTime.UtcNow;
     }
     public void Update(decimal amount, TransactionType type, DateTime transactionDate, string? description, Guid? categoryId)

@@ -89,6 +89,9 @@ builder.Services.AddScoped<IIdentityService, IdentityService>();
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
 builder.Services.AddTransient<IEmailService, SmtpEmailService>();
 
+// 10. Background Workers
+builder.Services.AddHostedService<PersonalFinanceApp.Api.Services.SubscriptionBackgroundWorker>();
+
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 
