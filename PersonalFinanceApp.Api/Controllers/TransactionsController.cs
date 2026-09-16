@@ -23,9 +23,9 @@ public class TransactionsController : ControllerBase
     }
 
     [HttpGet("{accountId}")]
-    public async Task<IActionResult> GetTransactions(Guid accountId)
+    public async Task<IActionResult> GetTransactions(Guid accountId, [FromQuery] int? year, [FromQuery] int? month)
     {
-        var transactions = await _sender.Send(new GetTransactionsQuery(accountId));
+        var transactions = await _sender.Send(new GetTransactionsQuery(accountId, year, month));
         return Ok(transactions);
     }
 

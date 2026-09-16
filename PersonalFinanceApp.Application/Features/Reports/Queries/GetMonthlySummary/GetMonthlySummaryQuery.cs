@@ -5,7 +5,7 @@ using PersonalFinanceApp.Domain.Enums;
 
 namespace PersonalFinanceApp.Application.Features.Reports.Queries.GetMonthlySummary;
 
-public record GetMonthlySummaryQuery(int Year, int Month, Guid? AccountId = null) : IRequest<MonthlySummaryDto>;
+public record GetMonthlySummaryQuery(DateTime StartDate, DateTime EndDate, Guid? AccountId = null) : IRequest<MonthlySummaryDto>;
 
 public class MonthlySummaryDto
 {
@@ -27,11 +27,11 @@ public class GetMonthlySummaryQueryHandler : IRequestHandler<GetMonthlySummaryQu
 
     public async Task<MonthlySummaryDto> Handle(GetMonthlySummaryQuery request, CancellationToken cancellationToken)
     {
-        var startDate = new DateTime(request.Year, request.Month, 1, 0, 0, 0, DateTimeKind.Utc);
-        var endDate = startDate.AddMonths(1);
+        var startDate = request.StartDate.ToUniversalTime();
+        var endDate = request.EndDate.ToUniversalTime();
 
         var query = _context.Transactions
-            .Where(t => t.TransactionDate >= startDate && t.TransactionDate < endDate);
+            .Where(t => t.TransactionDate >= startDate && t.TransactionDate <= endDate);
 
         if (request.AccountId.HasValue)
         {
@@ -49,8 +49,8 @@ public class GetMonthlySummaryQueryHandler : IRequestHandler<GetMonthlySummaryQu
 
         return new MonthlySummaryDto
         {
-            Year = request.Year,
-            Month = request.Month,
+            Year = startDate.Year,
+            Month = startDate.Month,
             TotalIncome = income,
             TotalExpense = expense
         };

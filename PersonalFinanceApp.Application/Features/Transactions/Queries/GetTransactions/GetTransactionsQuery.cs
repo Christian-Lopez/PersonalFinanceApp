@@ -4,7 +4,7 @@ using PersonalFinanceApp.Application.Common.Interfaces;
 
 namespace PersonalFinanceApp.Application.Features.Transactions.Queries.GetTransactions;
 
-public record GetTransactionsQuery(Guid AccountId) : IRequest<List<TransactionDto>>;
+public record GetTransactionsQuery(Guid AccountId, int? Year = null, int? Month = null) : IRequest<List<TransactionDto>>;
 
 public class TransactionDto
 {
@@ -42,8 +42,16 @@ public class GetTransactionsQueryHandler : IRequestHandler<GetTransactionsQuery,
         if (!accountExists)
             throw new ArgumentException($"Account {request.AccountId} not found.");
 
-        return await _context.Transactions
-            .Where(t => t.AccountId == request.AccountId)
+        var query = _context.Transactions.Where(t => t.AccountId == request.AccountId);
+
+        if (request.Year.HasValue && request.Month.HasValue)
+        {
+            var startDate = new DateTime(request.Year.Value, request.Month.Value, 1, 0, 0, 0, DateTimeKind.Utc);
+            var endDate = startDate.AddMonths(1);
+            query = query.Where(t => t.TransactionDate >= startDate && t.TransactionDate < endDate);
+        }
+
+        return await query
             .OrderByDescending(t => t.TransactionDate)
             .Select(t => new TransactionDto
             {
