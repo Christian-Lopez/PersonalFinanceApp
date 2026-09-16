@@ -107,6 +107,9 @@ public class IdentityService : IIdentityService
             return new AuthResult(false, null, null, null, new[] { "Invalid email or password." });
         }
 
+        user.LastLoginAtUtc = DateTime.UtcNow;
+        await _userManager.UpdateAsync(user);
+
         var token = await GenerateJwtTokenAsync(user);
 
         return new AuthResult(true, token, user.Id, user.Email, Enumerable.Empty<string>());
