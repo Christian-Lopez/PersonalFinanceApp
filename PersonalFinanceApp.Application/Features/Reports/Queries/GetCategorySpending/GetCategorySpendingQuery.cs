@@ -5,7 +5,7 @@ using PersonalFinanceApp.Domain.Enums;
 
 namespace PersonalFinanceApp.Application.Features.Reports.Queries.GetCategorySpending;
 
-public record GetCategorySpendingQuery(int Year, int Month, Guid? AccountId = null) : IRequest<List<CategorySpendingDto>>;
+public record GetCategorySpendingQuery(DateTime StartDate, DateTime EndDate, Guid? AccountId = null) : IRequest<List<CategorySpendingDto>>;
 
 public class CategorySpendingDto
 {
@@ -26,11 +26,11 @@ public class GetCategorySpendingQueryHandler : IRequestHandler<GetCategorySpendi
 
     public async Task<List<CategorySpendingDto>> Handle(GetCategorySpendingQuery request, CancellationToken cancellationToken)
     {
-        var startDate = new DateTime(request.Year, request.Month, 1, 0, 0, 0, DateTimeKind.Utc);
-        var endDate = startDate.AddMonths(1);
+        var startDate = request.StartDate.ToUniversalTime();
+        var endDate = request.EndDate.ToUniversalTime();
 
         var query = _context.Transactions
-            .Where(t => t.TransactionDate >= startDate && t.TransactionDate < endDate && t.Type == TransactionType.Expense);
+            .Where(t => t.TransactionDate >= startDate && t.TransactionDate <= endDate && t.Type == TransactionType.Expense);
 
         if (request.AccountId.HasValue)
         {

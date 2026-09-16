@@ -19,26 +19,26 @@ public class ReportsController : ControllerBase
     }
 
     [HttpGet("monthly-summary")]
-    public async Task<IActionResult> GetMonthlySummary([FromQuery] int year, [FromQuery] int month, [FromQuery] Guid? accountId)
+    public async Task<IActionResult> GetMonthlySummary([FromQuery] DateTime startDate, [FromQuery] DateTime endDate, [FromQuery] Guid? accountId)
     {
-        if (year < 2000 || month < 1 || month > 12)
+        if (startDate > endDate)
         {
-            return BadRequest("Invalid year or month.");
+            return BadRequest("Start date must be before end date.");
         }
 
-        var summary = await _sender.Send(new GetMonthlySummaryQuery(year, month, accountId));
+        var summary = await _sender.Send(new GetMonthlySummaryQuery(startDate, endDate, accountId));
         return Ok(summary);
     }
 
     [HttpGet("category-spending")]
-    public async Task<IActionResult> GetCategorySpending([FromQuery] int year, [FromQuery] int month, [FromQuery] Guid? accountId)
+    public async Task<IActionResult> GetCategorySpending([FromQuery] DateTime startDate, [FromQuery] DateTime endDate, [FromQuery] Guid? accountId)
     {
-        if (year < 2000 || month < 1 || month > 12)
+        if (startDate > endDate)
         {
-            return BadRequest("Invalid year or month.");
+            return BadRequest("Start date must be before end date.");
         }
 
-        var spending = await _sender.Send(new GetCategorySpendingQuery(year, month, accountId));
+        var spending = await _sender.Send(new GetCategorySpendingQuery(startDate, endDate, accountId));
         return Ok(spending);
     }
 
