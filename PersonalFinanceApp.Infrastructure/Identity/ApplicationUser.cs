@@ -9,4 +9,5 @@ public class ApplicationUser : IdentityUser
     public string DefaultCurrency { get; set; } = "USD";
     public bool IsActive { get; set; } = true;
     public DateTime CreatedAtUtc { get; set; }
+    public DateTime? LastLoginAtUtc { get; set; }
 }
